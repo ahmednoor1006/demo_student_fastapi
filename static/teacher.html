@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Student Teacher Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .nav-btn, .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .nav-btn:hover, .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .dashboard-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .dashboard-header h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dashboard-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .action-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .action-card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .data-table {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .table-header h3 {
+            margin: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e5e9;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">👨‍🏫 Teacher Dashboard</div>
+        <div class="nav-buttons">
+            <a href="/dashboard" class="nav-btn">🏠 Dashboard</a>
+            <a href="/student" class="nav-btn">👨‍🎓 Student View</a>
+            <span id="userName">Loading...</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Teacher Management Portal</h1>
+            <p>Manage teachers, students, and academic records</p>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <div class="actions">
+            <div class="action-card">
+                <h3>➕ Add New Teacher</h3>
+                <form id="teacherForm">
+                    <div class="form-group">
+                        <label for="teacherName">Teacher Name</label>
+                        <input type="text" id="teacherName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="teacherSubject">Subject</label>
+                        <input type="text" id="teacherSubject" required>
+                    </div>
+                    <button type="submit" class="btn">Add Teacher</button>
+                </form>
+            </div>
+            
+            <div class="action-card">
+                <h3>👨‍🎓 Add New Student</h3>
+                <form id="studentForm">
+                    <div class="form-group">
+                        <label for="studentName">Student Name</label>
+                        <input type="text" id="studentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentMarks">Marks</label>
+                        <input type="number" id="studentMarks" min="0" max="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="teacherId">Assign to Teacher</label>
+                        <select id="teacherId" required>
+                            <option value="">Select Teacher</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Add Student</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="data-table">
+            <div class="table-header">
+                <h3>👨‍🏫 Teachers List</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Subject</th>
+                        <th>Students Count</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="teachersTable">
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem;">Loading teachers...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <br>
+        
+        <div class="data-table">
+            <div class="table-header">
+                <h3>👨‍🎓 Students List</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Marks</th>
+                        <th>Teacher</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTable">
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem;">Loading students...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // Check authentication
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/';
+        }
+        
+        // Display user name
+        document.getElementById('userName').textContent = 
+            localStorage.getItem('userName') || 'User';
+        
+        // API base URL
+        const API_BASE = '';
+        
+        // Headers for API requests
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+        
+        // Show alert
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alertContainer.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+        
+        // Load teachers
+        async function loadTeachers() {
+            try {
+                const response = await fetch('/teachers/', { headers });
+                const teachers = await response.json();
+                
+                const tbody = document.getElementById('teachersTable');
+                const select = document.getElementById('teacherId');
+                
+                if (teachers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No teachers found</td></tr>';
+                } else {
+                    tbody.innerHTML = teachers.map(teacher => `
+                        <tr>
+                            <td>${teacher.id}</td>
+                            <td>${teacher.name}</td>
+                            <td>${teacher.subject}</td>
+                            <td>${teacher.students ? teacher.students.length : 0}</td>
+                            <td>
+                                <button class="delete-btn" onclick="deleteTeacher(${teacher.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+                
+                // Update teacher select options
+                select.innerHTML = '<option value="">Select Teacher</option>' + 
+                    teachers.map(teacher => `<option value="${teacher.id}">${teacher.name} (${teacher.subject})</option>`).join('');
+                
+            } catch (error) {
+                console.error('Error loading teachers:', error);
+                showAlert('Error loading teachers', 'error');
+            }
+        }
+        
+        // Load students
+        async function loadStudents() {
+            try {
+                const response = await fetch('/students/', { headers });
+                const students = await response.json();
+                
+                const tbody = document.getElementById('studentsTable');
+                
+                if (students.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No students found</td></tr>';
+                } else {
+                    tbody.innerHTML = students.map(student => `
+                        <tr>
+                            <td>${student.id}</td>
+                            <td>${student.name}</td>
+                            <td>${student.marks}</td>
+                            <td>${student.teacher ? student.teacher.name : 'Not Assigned'}</td>
+                            <td>
+                                <button class="delete-btn" onclick="deleteStudent(${student.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+                
+            } catch (error) {
+                console.error('Error loading students:', error);
+                showAlert('Error loading students', 'error');
+            }
+        }
+        
+        // Add teacher
+        document.getElementById('teacherForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('teacherName').value;
+            const subject = document.getElementById('teacherSubject').value;
+            
+            try {
+                const response = await fetch('/teachers/', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ name, subject })
+                });
+                
+                if (response.ok) {
+                    showAlert('Teacher added successfully!');
+                    document.getElementById('teacherForm').reset();
+                    loadTeachers();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Error adding teacher', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding teacher:', error);
+                showAlert('Error adding teacher', 'error');
+            }
+        });
+        
+        // Add student
+        document.getElementById('studentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('studentName').value;
+            const marks = parseInt(document.getElementById('studentMarks').value);
+            const teacher_id = parseInt(document.getElementById('teacherId').value);
+            
+            try {
+                const response = await fetch('/students/', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ name, marks, teacher_id })
+                });
+                
+                if (response.ok) {
+                    showAlert('Student added successfully!');
+                    document.getElementById('studentForm').reset();
+                    loadStudents();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Error adding student', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding student:', error);
+                showAlert('Error adding student', 'error');
+            }
+        });
+        
+        // Delete teacher
+        async function deleteTeacher(id) {
+            if (!confirm('Are you sure you want to delete this teacher?')) return;
+            
+            try {
+                const response = await fetch(`/teachers/${id}`, {
+                    method: 'DELETE',
+                    headers
+                });
+                
+                if (response.ok) {
+                    showAlert('Teacher deleted successfully!');
+                    loadTeachers();
+                    loadStudents(); // Refresh students as well
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Error deleting teacher', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting teacher:', error);
+                showAlert('Error deleting teacher', 'error');
+            }
+        }
+        
+        // Delete student
+        async function deleteStudent(id) {
+            if (!confirm('Are you sure you want to delete this student?')) return;
+            
+            try {
+                const response = await fetch(`/students/${id}`, {
+                    method: 'DELETE',
+                    headers
+                });
+                
+                if (response.ok) {
+                    showAlert('Student deleted successfully!');
+                    loadStudents();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Error deleting student', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting student:', error);
+                showAlert('Error deleting student', 'error');
+            }
+        }
+        
+        // Logout
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+        
+        // Load data on page load
+        loadTeachers();
+        loadStudents();
+    </script>
+</body>
+</html>

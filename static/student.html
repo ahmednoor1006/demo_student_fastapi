@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Student Teacher Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .nav-btn, .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .nav-btn:hover, .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .dashboard-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .dashboard-header h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dashboard-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .data-table {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .table-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+        }
+        
+        .table-header h3 {
+            margin: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e5e9;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .grade-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .grade-a {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .grade-b {
+            background: #cce7ff;
+            color: #004085;
+        }
+        
+        .grade-c {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .grade-d {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e1e5e9;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">👨‍🎓 Student Dashboard</div>
+        <div class="nav-buttons">
+            <a href="/dashboard" class="nav-btn">🏠 Dashboard</a>
+            <a href="/teacher" class="nav-btn">👨‍🏫 Teacher View</a>
+            <span id="userName">Loading...</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Student Academic Portal</h1>
+            <p>View your academic progress and performance</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-number" id="totalStudents">0</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-number" id="averageMarks">0</div>
+                <div class="stat-label">Average Marks</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-number" id="topPerformers">0</div>
+                <div class="stat-label">Top Performers (90+)</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">👨‍🏫</div>
+                <div class="stat-number" id="totalTeachers">0</div>
+                <div class="stat-label">Total Teachers</div>
+            </div>
+        </div>
+        
+        <div class="data-table">
+            <div class="table-header">
+                <h3>📚 All Students Performance</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Marks</th>
+                        <th>Grade</th>
+                        <th>Teacher</th>
+                        <th>Subject</th>
+                        <th>Progress</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTable">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 2rem;">Loading student data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="data-table">
+            <div class="table-header">
+                <h3>👨‍🏫 Teachers & Subjects</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Teacher ID</th>
+                        <th>Name</th>
+                        <th>Subject</th>
+                        <th>Students Count</th>
+                        <th>Average Class Performance</th>
+                    </tr>
+                </thead>
+                <tbody id="teachersTable">
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem;">Loading teacher data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // Check authentication
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/';
+        }
+        
+        // Display user name
+        document.getElementById('userName').textContent = 
+            localStorage.getItem('userName') || 'User';
+        
+        // API base URL
+        const API_BASE = '';
+        
+        // Headers for API requests
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+        
+        // Get grade from marks
+        function getGrade(marks) {
+            if (marks >= 90) return { grade: 'A', class: 'grade-a' };
+            if (marks >= 80) return { grade: 'B', class: 'grade-b' };
+            if (marks >= 70) return { grade: 'C', class: 'grade-c' };
+            return { grade: 'D', class: 'grade-d' };
+        }
+        
+        // Load students data
+        async function loadStudents() {
+            try {
+                const response = await fetch('/students/', { headers });
+                const students = await response.json();
+                
+                const tbody = document.getElementById('studentsTable');
+                
+                if (students.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📚</div>
+                                    <h3>No Students Found</h3>
+                                    <p>No student records available at the moment.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = students.map(student => {
+                        const gradeInfo = getGrade(student.marks);
+                        return `
+                            <tr>
+                                <td>${student.id}</td>
+                                <td>${student.name}</td>
+                                <td><strong>${student.marks}</strong></td>
+                                <td><span class="grade-badge ${gradeInfo.class}">${gradeInfo.grade}</span></td>
+                                <td>${student.teacher ? student.teacher.name : 'Not Assigned'}</td>
+                                <td>${student.teacher ? student.teacher.subject : 'N/A'}</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${student.marks}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+                
+                // Update statistics
+                updateStats(students);
+                
+            } catch (error) {
+                console.error('Error loading students:', error);
+                document.getElementById('studentsTable').innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 2rem; color: #dc3545;">
+                            Error loading student data. Please try again later.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        // Load teachers data
+        async function loadTeachers() {
+            try {
+                const response = await fetch('/teachers/', { headers });
+                const teachers = await response.json();
+                
+                const tbody = document.getElementById('teachersTable');
+                
+                if (teachers.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">👨‍🏫</div>
+                                    <h3>No Teachers Found</h3>
+                                    <p>No teacher records available at the moment.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = teachers.map(teacher => {
+                        const studentsCount = teacher.students ? teacher.students.length : 0;
+                        const avgMarks = studentsCount > 0 ? 
+                            Math.round(teacher.students.reduce((sum, s) => sum + s.marks, 0) / studentsCount) : 0;
+                        
+                        return `
+                            <tr>
+                                <td>${teacher.id}</td>
+                                <td>${teacher.name}</td>
+                                <td><strong>${teacher.subject}</strong></td>
+                                <td>${studentsCount}</td>
+                                <td>
+                                    ${studentsCount > 0 ? `
+                                        <div style="display: flex; align-items: center; gap: 1rem;">
+                                            <span><strong>${avgMarks}%</strong></span>
+                                            <div class="progress-bar" style="flex: 1;">
+                                                <div class="progress-fill" style="width: ${avgMarks}%"></div>
+                                            </div>
+                                        </div>
+                                    ` : 'No students'}
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+                
+                // Update teacher count
+                document.getElementById('totalTeachers').textContent = teachers.length;
+                
+            } catch (error) {
+                console.error('Error loading teachers:', error);
+                document.getElementById('teachersTable').innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem; color: #dc3545;">
+                            Error loading teacher data. Please try again later.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        // Update statistics
+        function updateStats(students) {
+            const totalStudents = students.length;
+            const averageMarks = totalStudents > 0 ? 
+                Math.round(students.reduce((sum, s) => sum + s.marks, 0) / totalStudents) : 0;
+            const topPerformers = students.filter(s => s.marks >= 90).length;
+            
+            document.getElementById('totalStudents').textContent = totalStudents;
+            document.getElementById('averageMarks').textContent = averageMarks + '%';
+            document.getElementById('topPerformers').textContent = topPerformers;
+        }
+        
+        // Logout
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+        
+        // Load data on page load
+        loadStudents();
+        loadTeachers();
+    </script>
+</body>
+</html>
