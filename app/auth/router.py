@@ -1,12 +1,15 @@
+from datetime import timedelta
+import os
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from authlib.integrations.starlette_client import OAuth
 from starlette.config import Config
-import os
-import crud, database, schemas, auth_utils
-from auth_utils import create_access_token
-from datetime import timedelta
+
+from .. import crud, database, schemas
+from .utils import create_access_token, get_current_user
+
 
 router = APIRouter()
 
@@ -28,6 +31,7 @@ if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
         }
     )
 
+
 @router.get("/auth/login")
 async def login(request: Request):
     """Initiate Google OAuth login"""
@@ -41,9 +45,10 @@ async def login(request: Request):
             url=f"/dashboard?token={access_token}&user_id=1&user_name=Demo User",
             status_code=302
         )
-    
+
     redirect_uri = request.url_for("auth_callback")  # dynamic instead of hardcoded
     return await oauth.google.authorize_redirect(request, redirect_uri)
+
 
 @router.get("/auth/callback", name="auth_callback")
 async def auth_callback(request: Request, db: Session = Depends(database.get_db)):
@@ -81,12 +86,16 @@ async def auth_callback(request: Request, db: Session = Depends(database.get_db)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Authentication failed: {str(e)}")
 
+
 @router.get("/auth/me")
-async def get_current_user_info(current_user: schemas.User = Depends(auth_utils.get_current_user)):
+async def get_current_user_info(current_user: schemas.User = Depends(get_current_user)):
     """Get current user information"""
     return current_user
+
 
 @router.post("/auth/logout")
 async def logout():
     """Logout endpoint"""
     return {"message": "Logged out successfully"}
+
+

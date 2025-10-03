@@ -256,3 +256,4 @@ For issues and questions:
 - 🎓 Grade management
 - 📅 Assignment scheduling
 - 💬 Messaging system
+
