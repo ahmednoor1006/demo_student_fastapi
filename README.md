@@ -52,7 +52,7 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 2. Create a new project or select existing one
 3. Enable Google+ API
 4. Create OAuth 2.0 credentials
-5. Add authorized redirect URI: `http://localhost:8000/auth/callback`
+5. Add authorized redirect URI: `http://localhost:8000/api/v1/auth/callback`
 6. Copy Client ID and Client Secret to `.env`
 
 ### 4. Run the Application
@@ -61,17 +61,20 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 python start.py
 ```
 
-This will:
-- Install requirements
-- Setup environment
-- Run database migrations
-- Start the FastAPI server
+Alternative (manual run):
+```bash
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+This will start the FastAPI server locally.
 
 ### 5. Access the Application
 
 - **Frontend**: http://localhost:8000
 - **API Docs**: http://localhost:8000/docs
-- **Google Login**: http://localhost:8000/auth/login
+- **API Base**: http://localhost:8000/api/v1
+- **Google Login**: http://localhost:8000/api/v1/auth/login
 
 ## 📱 Usage
 
@@ -98,44 +101,89 @@ This will:
 
 ## 🛠️ API Endpoints
 
-### Authentication
-- `GET /auth/login` - Initiate Google OAuth
-- `GET /auth/callback` - OAuth callback
-- `GET /auth/me` - Get current user info
-- `POST /auth/logout` - Logout
+### Authentication (versioned)
+- `GET /api/v1/auth/login` - Initiate Google OAuth
+- `GET /api/v1/auth/callback` - OAuth callback
+- `GET /api/v1/auth/me` - Get current user info
+- `POST /api/v1/auth/logout` - Logout
 
-### Teachers
-- `GET /teachers/` - List all teachers
-- `POST /teachers/` - Create new teacher
-- `DELETE /teachers/{id}` - Delete teacher
+### Teachers (versioned)
+- `GET /api/v1/teachers/` - List all teachers
+- `POST /api/v1/teachers/` - Create new teacher
+- `DELETE /api/v1/teachers/{id}` - Delete teacher
 
-### Students
-- `GET /students/` - List all students
-- `POST /students/` - Create new student
-- `DELETE /students/{id}` - Delete student
+### Students (versioned)
+- `GET /api/v1/students/` - List all students
+- `POST /api/v1/students/` - Create new student
+- `DELETE /api/v1/students/{id}` - Delete student
 
 ## 🏗️ Project Structure
 
 ```
 project/
 ├── app/
-│   ├── main.py          # FastAPI application
-│   ├── models.py        # SQLAlchemy models
-│   ├── schemas.py       # Pydantic schemas
-│   ├── database.py      # Database configuration
-│   ├── auth.py          # Authentication routes
-│   ├── auth_utils.py    # JWT utilities
-│   └── crud.py          # Database operations
+│   ├── main.py              # FastAPI application (mounts /api/v1)
+│   ├── database.py          # Database configuration
+│   ├── api/
+│   │   └── v1/
+│   │       ├── router.py    # Aggregates v1 routers
+│   │       └── routers/
+│   │           ├── students.py
+│   │           ├── teachers.py
+│   │           └── auth.py   # mounts app/auth/router
+│   ├── models/              # SQLAlchemy models
+│   │   ├── __init__.py
+│   │   ├── student.py
+│   │   ├── teacher.py
+│   │   └── user.py
+│   ├── schemas/             # Pydantic schemas
+│   │   ├── __init__.py
+│   │   ├── student.py
+│   │   ├── teacher.py
+│   │   └── user.py
+│   ├── crud/                # Per-entity data access
+│   │   ├── __init__.py
+│   │   ├── student.py
+│   │   ├── teacher.py
+│   │   └── user.py
+│   └── auth/                # Authentication package
+│       ├── __init__.py
+│       ├── router.py        # /auth/* endpoints
+│       └── utils.py         # JWT helpers
 ├── static/
-│   ├── index.html       # Landing page
-│   ├── dashboard.html   # Role selection
-│   ├── teacher.html     # Teacher dashboard
-│   └── student.html     # Student dashboard
-├── alembic/             # Database migrations
-├── requirements.txt     # Python dependencies
-├── start.py            # Startup script
-└── README.md           # This file
+│   ├── index.html           # Landing page
+│   ├── dashboard.html       # Role selection
+│   ├── teacher.html         # Teacher dashboard
+│   └── student.html         # Student dashboard
+├── alembic/                 # Database migrations
+├── requirements.txt         # Python dependencies
+├── start.py                 # Startup script
+└── README.md                # This file
 ```
+
+## 🧩 Branching & Git Workflow
+
+Use a development branch for feature work and open PRs to main.
+
+```bash
+cd project
+
+# initialize repo if needed
+git init
+
+# set remote
+git remote add origin https://github.com/ahmednoor1006/demo_student_fastapi.git
+
+# create/switch to development
+git checkout -B development
+
+# commit and push
+git add -A
+git commit -m "refactor: v1 API, split modules, auth package"
+git push -u origin development
+```
+
+Repository: [demo_student_fastapi](https://github.com/ahmednoor1006/demo_student_fastapi.git)
 
 ## 🔧 Development
 
